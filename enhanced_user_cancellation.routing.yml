@@ -1,0 +1,48 @@
+enhanced_user_cancellation.settings:
+  path: '/admin/config/people/enhanced-user-cancellation'
+  defaults:
+    _form: 'Drupal\enhanced_user_cancellation\Form\EnhancedUserCancellationConfigForm'
+    _title: 'Enhanced User Cancellation Settings'
+  requirements:
+    _permission: 'administer enhanced user cancellation'
+
+enhanced_user_cancellation.cancel_account:
+  path: '/user/{user}/cancel-enhanced'
+  defaults:
+    _form: 'Drupal\enhanced_user_cancellation\Form\UserCancelConfirmForm'
+    _title: 'Cancel Account'
+  requirements:
+    _permission: 'access content'
+  options:
+    _admin_route: FALSE
+    parameters:
+      user:
+        type: entity:user
+
+enhanced_user_cancellation.admin:
+  path: '/admin/people/pending-deletion'
+  defaults:
+    _controller: 'Drupal\enhanced_user_cancellation\Controller\PendingDeletionController::adminPage'
+    _title: 'Pending Account Deletions'
+  requirements:
+    _permission: 'administer enhanced user cancellation'
+
+enhanced_user_cancellation.admin_delete:
+  path: '/admin/people/pending-deletion/{user}/delete'
+  defaults:
+    _form: 'Drupal\enhanced_user_cancellation\Form\AdminDeleteUserForm'
+    _title: 'Delete User Account'
+  requirements:
+    _permission: 'administer enhanced user cancellation'
+  options:
+    _admin_route: TRUE
+
+enhanced_user_cancellation.admin_cancel:
+  path: '/admin/people/pending-deletion/{user}/cancel'
+  defaults:
+    _form: 'Drupal\enhanced_user_cancellation\Form\AdminCancelDeletionForm'
+    _title: 'Cancel User Deletion'
+  requirements:
+    _permission: 'administer enhanced user cancellation'
+  options:
+    _admin_route: TRUE

@@ -1,0 +1,8 @@
+administer enhanced user cancellation:
+  title: 'Administer enhanced user cancellation'
+  description: 'Manage pending user account deletions and module settings'
+  restrict access: true
+
+cancel own user account enhanced:
+  title: 'Cancel own user account (enhanced)'
+  description: 'Use the enhanced cancellation process with grace period'

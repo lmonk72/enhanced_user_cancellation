@@ -1,0 +1,29 @@
+modal_cancellation:
+  version: 1.x
+  js:
+    js/modal-cancellation.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+
+modal_cancellation_edit:
+  version: 1.x
+  js:
+    js/modal-cancellation-edit.js: {}
+  css:
+    theme:
+      css/admin-styles.css: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.ajax
+    - core/drupal.dialog
+    - core/drupal.dialog.ajax
+
+admin_styles:
+  version: 1.x
+  css:
+    theme:
+      css/admin-styles.css: {}

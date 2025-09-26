@@ -1,0 +1,13 @@
+enhanced_user_cancellation.admin:
+  title: 'Pending Account Deletions'
+  route_name: enhanced_user_cancellation.admin
+  description: 'Manage users pending account deletion'
+  parent: system.admin_people
+  weight: 10
+
+enhanced_user_cancellation.settings:
+  title: 'Enhanced User Cancellation'
+  route_name: enhanced_user_cancellation.settings
+  description: 'Configure enhanced user cancellation settings'
+  parent: system.admin_config_people
+  weight: 15

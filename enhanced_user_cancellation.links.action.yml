@@ -1,0 +1,7 @@
+enhanced_user_cancellation.user_cancel:
+  route_name: enhanced_user_cancellation.cancel_account
+  title: 'Cancel Account (Enhanced)'
+  appears_on:
+    - entity.user.canonical
+    - entity.user.edit_form
+  weight: 100

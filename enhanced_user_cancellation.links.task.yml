@@ -1,0 +1,4 @@
+enhanced_user_cancellation.admin_tab:
+  route_name: enhanced_user_cancellation.admin
+  title: 'Pending Deletions'
+  base_route: entity.user.collection

@@ -1,0 +1,150 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for enhanced_user_cancellation module.
+ */
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+
+/**
+ * Implements hook_install().
+ */
+function enhanced_user_cancellation_install() {
+  // Create fields for tracking pending deletion.
+  _enhanced_user_cancellation_create_fields();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function enhanced_user_cancellation_uninstall() {
+  // Remove fields.
+  $field_names = ['field_pending_deletion', 'field_deletion_requested'];
+  
+  foreach ($field_names as $field_name) {
+    $field_config = FieldConfig::loadByName('user', 'user', $field_name);
+    if ($field_config) {
+      $field_config->delete();
+    }
+    
+    $field_storage = FieldStorageConfig::loadByName('user', $field_name);
+    if ($field_storage) {
+      $field_storage->delete();
+    }
+  }
+}
+
+/**
+ * Create fields for tracking pending deletion.
+ */
+function _enhanced_user_cancellation_create_fields() {
+  // Create field storage for pending deletion timestamp.
+  if (!FieldStorageConfig::loadByName('user', 'field_pending_deletion')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_pending_deletion',
+      'entity_type' => 'user',
+      'type' => 'integer',
+      'settings' => [],
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  // Create field instance for pending deletion timestamp.
+  if (!FieldConfig::loadByName('user', 'user', 'field_pending_deletion')) {
+    FieldConfig::create([
+      'field_name' => 'field_pending_deletion',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'Pending Deletion Timestamp',
+      'description' => 'Timestamp when the user account should be deleted.',
+      'required' => FALSE,
+      'default_value' => [['value' => 0]],
+      'settings' => [],
+    ])->save();
+  }
+  
+  // Hide the field from form displays
+  _enhanced_user_cancellation_hide_field_displays('field_pending_deletion');
+
+  // Create field storage for deletion requested timestamp.
+  if (!FieldStorageConfig::loadByName('user', 'field_deletion_requested')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_deletion_requested',
+      'entity_type' => 'user',
+      'type' => 'integer',
+      'settings' => [],
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  // Create field instance for deletion requested timestamp.
+  if (!FieldConfig::loadByName('user', 'user', 'field_deletion_requested')) {
+    FieldConfig::create([
+      'field_name' => 'field_deletion_requested',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'Deletion Request Timestamp',
+      'description' => 'Timestamp when the user requested account deletion.',
+      'required' => FALSE,
+      'default_value' => [['value' => 0]],
+      'settings' => [],
+    ])->save();
+  }
+  
+  // Hide the field from form displays
+  _enhanced_user_cancellation_hide_field_displays('field_deletion_requested');
+}
+
+/**
+ * Hide field from all user displays and forms.
+ */
+function _enhanced_user_cancellation_hide_field_displays($field_name) {
+  // Hide from default form display
+  $form_display = \Drupal::entityTypeManager()
+    ->getStorage('entity_form_display')
+    ->load('user.user.default');
+  
+  if ($form_display) {
+    $content = $form_display->get('content');
+    if (isset($content[$field_name])) {
+      unset($content[$field_name]);
+      $form_display->set('content', $content);
+      
+      // Add to hidden
+      $hidden = $form_display->get('hidden');
+      $hidden[$field_name] = TRUE;
+      $form_display->set('hidden', $hidden);
+      $form_display->save();
+    }
+  }
+  
+  // Hide from default view display  
+  $view_display = \Drupal::entityTypeManager()
+    ->getStorage('entity_view_display')
+    ->load('user.user.default');
+    
+  if ($view_display) {
+    $content = $view_display->get('content');
+    if (isset($content[$field_name])) {
+      unset($content[$field_name]);
+      $view_display->set('content', $content);
+      
+      // Add to hidden
+      $hidden = $view_display->get('hidden');
+      $hidden[$field_name] = TRUE;
+      $view_display->set('hidden', $hidden);
+      $view_display->save();
+    }
+  }
+}
+
+/**
+ * Update 8001: Fix task tab base route.
+ */
+function enhanced_user_cancellation_update_8001() {
+  // Clear menu cache to update task links
+  \Drupal::service('plugin.manager.menu.local_task')->clearCachedDefinitions();
+  \Drupal::service('router.builder')->rebuild();
+}

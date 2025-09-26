@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ * Enhanced User Cancellation module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Url;
+use Drupal\user\Entity\User;
+
+/**
+ * Implements hook_form_alter().
+ */
+function enhanced_user_cancellation_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Alter the user cancel confirm form to use modal.
+  if ($form_id == 'user_cancel_confirm_form') {
+    $form['#attached']['library'][] = 'enhanced_user_cancellation/modal_cancellation';
+    $form['#attached']['drupalSettings']['enhanced_user_cancellation'] = [
+      'modal_title' => (string) new \Drupal\Core\StringTranslation\TranslatableMarkup('Cancel Account'),
+      'cancel_url' => Url::fromRoute('enhanced_user_cancellation.cancel_account')->toString(),
+    ];
+  }
+  
+  // Add enhanced cancellation modal to user edit forms
+  if ($form_id == 'user_form') {
+    // Attach the modal JavaScript to user edit pages
+    $form['#attached']['library'][] = 'enhanced_user_cancellation/modal_cancellation_edit';
+    
+    // Get user from route parameter instead
+    $user = \Drupal::routeMatch()->getParameter('user');
+    if ($user) {
+      $current_user = \Drupal::currentUser();
+      
+      // Pass settings for JavaScript
+      $form['#attached']['drupalSettings']['enhancedUserCancellation'] = [
+        'userId' => $user->id(),
+        'canCancel' => ($user->id() == $current_user->id() && $current_user->hasPermission('cancel own user account enhanced')) || $current_user->hasPermission('administer enhanced user cancellation'),
+      ];
+    }
+  }
+}/**
+ * Implements hook_user_cancel().
+ */
+function enhanced_user_cancellation_user_cancel($edit, $account, $method) {
+  // Don't proceed with default cancellation if using enhanced method.
+  if ($method == 'enhanced_user_cancellation_pending') {
+    return;
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function enhanced_user_cancellation_cron() {
+  $cancellation_service = \Drupal::service('enhanced_user_cancellation.cancellation_service');
+  $cancellation_service->processScheduledDeletions();
+}
+
+/**
+ * Implements hook_mail().
+ */
+function enhanced_user_cancellation_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'pending_deletion':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = (string) new \Drupal\Core\StringTranslation\TranslatableMarkup('Account Cancellation Confirmation - @site', [
+        '@site' => \Drupal::config('system.site')->get('name'),
+      ]);
+      $message['body'][] = $params['message'];
+      break;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function enhanced_user_cancellation_theme() {
+  return [
+    'enhanced_user_cancellation_admin_table' => [
+      'variables' => [
+        'pending_users' => [],
+        'header' => [],
+      ],
+    ],
+  ];
+}

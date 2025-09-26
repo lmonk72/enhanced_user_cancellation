@@ -1,0 +1,4 @@
+services:
+  enhanced_user_cancellation.cancellation_service:
+    class: Drupal\enhanced_user_cancellation\Service\UserCancellationService
+    arguments: ['@entity_type.manager', '@queue', '@config.factory', '@logger.factory']

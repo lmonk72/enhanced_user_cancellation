@@ -1,0 +1,11 @@
+name: Enhanced User Cancellation
+type: module
+description: 'Provides enhanced user account cancellation with modal confirmation, pending deletion state, and scheduled cleanup.'
+core_version_requirement: ^10
+package: Custom
+dependencies:
+  - drupal:user
+  - drupal:system
+  - drupal:field
+  - drupal:datetime
+configure: enhanced_user_cancellation.settings
