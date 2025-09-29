@@ -6,8 +6,8 @@
    */
   Drupal.behaviors.enhancedUserCancellationEditModal = {
     attach: function (context, settings) {
-      // Look for the "Cancel Account (Enhanced)" action link on user edit pages
-      once('enhanced-cancellation-edit', 'a[href*="/cancel-enhanced"]', context).forEach(function (link) {
+      // Look for the "Cancel Account" action link on user edit pages
+      once('enhanced-cancellation-edit', 'a[href*="/cancel-account"]', context).forEach(function (link) {
         console.log('Enhanced User Cancellation: Found cancel link on edit page');
         
         $(link).on('click', function (e) {
@@ -44,15 +44,26 @@
                 click: function() {
                   console.log('Enhanced User Cancellation: User confirmed, processing deletion');
                   
-                  // Show loading state
-                  $(this).find('.button--danger').text(Drupal.t('Processing...')).prop('disabled', true);
+                  var $button = $(this).parent().find('.button--danger');
+                  var $dialog = $(this);
+                  
+                  // Disable the button and show loading state
+                  $button.prop('disabled', true)
+                         .addClass('is-disabled')
+                         .text(Drupal.t('Processing...'));
+                  
+                  // Also disable the keep account button
+                  $(this).parent().find('.button').not('.button--danger').prop('disabled', true);
                   
                   // Extract user ID from the cancel URL
-                  var userIdMatch = cancelUrl.match(/\/user\/(\d+)\/cancel-enhanced/);
+                  var userIdMatch = cancelUrl.match(/\/user\/(\d+)\/cancel-account/);
                   var userId = userIdMatch ? userIdMatch[1] : null;
                   
                   if (!userId) {
                     console.error('Could not extract user ID from URL:', cancelUrl);
+                    // Re-enable buttons on error
+                    $button.prop('disabled', false).removeClass('is-disabled').text(Drupal.t('Cancel Account'));
+                    $(this).parent().find('.button').prop('disabled', false);
                     $dialog.dialog('close');
                     return;
                   }
@@ -100,11 +111,18 @@
                           
                           // Redirect to home page after a delay
                           setTimeout(function() {
-                            window.location.href = Drupal.url('<front>');
+                            window.location.href = drupalSettings.path.baseUrl || '/';
                           }, 3000);
                         },
                         error: function (xhr, status, error) {
                           console.error('Form submission failed:', error);
+                          
+                          // Re-enable buttons on error
+                          $button.prop('disabled', false)
+                                 .removeClass('is-disabled')
+                                 .text(Drupal.t('Cancel Account'));
+                          $(this).parent().find('.button').prop('disabled', false);
+                          
                           $dialog.dialog('close');
                           
                           var errorMessage = '<div class="messages messages--error">' +
@@ -120,6 +138,13 @@
                     })
                     .fail(function() {
                       console.error('Failed to get form data');
+                      
+                      // Re-enable buttons on error
+                      $button.prop('disabled', false)
+                             .removeClass('is-disabled')
+                             .text(Drupal.t('Cancel Account'));
+                      $(this).parent().find('.button').prop('disabled', false);
+                      
                       $dialog.dialog('close');
                     });
                 }

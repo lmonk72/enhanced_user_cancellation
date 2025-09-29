@@ -5,6 +5,8 @@ A Drupal module that provides an enhanced user account cancellation process with
 ## Features
 
 - **Modal Confirmation Dialog**: Users see a professional modal dialog when canceling their account instead of a basic form
+- **Replaces Default Cancel Button**: Seamlessly replaces Drupal's default cancel account functionality
+- **Edit Page Only**: Cancel button only appears on user edit page, not on user profile view
 - **72-Hour Grace Period**: Users have 72 hours to change their mind before permanent deletion
 - **Email Notifications**: Automatic email confirmations sent to users when they initiate cancellation
 - **Pending Deletion State**: User accounts are marked as "pending deletion" and blocked during the grace period
@@ -43,10 +45,12 @@ Configure the module at: `/admin/config/people/enhanced-user-cancellation`
 ### For Users
 
 1. Navigate to your user account edit page (`/user/{uid}/edit`)
-2. Click the "Cancel Account (Enhanced)" link
+2. Click the "Cancel Account" button (replaces the default cancel button)
 3. Confirm in the modal dialog
 4. Check your email for confirmation
 5. You have 72 hours to log back in to cancel the deletion
+
+**Note**: The enhanced cancel account button only appears on the user edit page and replaces Drupal's default cancel account functionality.
 
 ### For Administrators
 

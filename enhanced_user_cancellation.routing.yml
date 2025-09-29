@@ -7,7 +7,7 @@ enhanced_user_cancellation.settings:
     _permission: 'administer enhanced user cancellation'
 
 enhanced_user_cancellation.cancel_account:
-  path: '/user/{user}/cancel-enhanced'
+  path: '/user/{user}/cancel-account'
   defaults:
     _form: 'Drupal\enhanced_user_cancellation\Form\UserCancelConfirmForm'
     _title: 'Cancel Account'

@@ -1,0 +1,61 @@
+/**
+ * Enhanced User Cancellation styles.
+ */
+
+.enhanced-user-cancellation-dialog {
+  font-family: inherit;
+}
+
+.enhanced-cancellation-modal-content {
+  padding: 15px 0;
+}
+
+.enhanced-cancellation-modal-content p {
+  margin: 0 0 15px 0;
+}
+
+.enhanced-cancellation-modal-content .messages {
+  margin: 15px 0;
+  padding: 10px 15px;
+  border-left: 4px solid #f4a100;
+  background-color: #fdf8ed;
+}
+
+/* Disabled button styles */
+.ui-dialog .button.is-disabled,
+.ui-dialog .button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.ui-dialog .button.is-disabled:hover,
+.ui-dialog .button:disabled:hover {
+  background-color: inherit;
+  border-color: inherit;
+  color: inherit;
+}
+
+/* Processing state animation */
+.ui-dialog .button.is-disabled.button--danger {
+  position: relative;
+}
+
+.ui-dialog .button.is-disabled.button--danger::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
+}

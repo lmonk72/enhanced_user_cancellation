@@ -101,42 +101,27 @@ function _enhanced_user_cancellation_create_fields() {
  * Hide field from all user displays and forms.
  */
 function _enhanced_user_cancellation_hide_field_displays($field_name) {
-  // Hide from default form display
-  $form_display = \Drupal::entityTypeManager()
-    ->getStorage('entity_form_display')
-    ->load('user.user.default');
+  $entity_display_repository = \Drupal::service('entity_display.repository');
   
+  // Hide from default form display
+  $form_display = $entity_display_repository->getFormDisplay('user', 'user', 'default');
   if ($form_display) {
-    $content = $form_display->get('content');
-    if (isset($content[$field_name])) {
-      unset($content[$field_name]);
-      $form_display->set('content', $content);
-      
-      // Add to hidden
-      $hidden = $form_display->get('hidden');
-      $hidden[$field_name] = TRUE;
-      $form_display->set('hidden', $hidden);
-      $form_display->save();
-    }
+    $form_display->removeComponent($field_name);
+    $form_display->save();
   }
   
   // Hide from default view display  
-  $view_display = \Drupal::entityTypeManager()
-    ->getStorage('entity_view_display')
-    ->load('user.user.default');
-    
+  $view_display = $entity_display_repository->getViewDisplay('user', 'user', 'default');
   if ($view_display) {
-    $content = $view_display->get('content');
-    if (isset($content[$field_name])) {
-      unset($content[$field_name]);
-      $view_display->set('content', $content);
-      
-      // Add to hidden
-      $hidden = $view_display->get('hidden');
-      $hidden[$field_name] = TRUE;
-      $view_display->set('hidden', $hidden);
-      $view_display->save();
-    }
+    $view_display->removeComponent($field_name);
+    $view_display->save();
+  }
+  
+  // Hide from compact view display if it exists
+  $compact_display = $entity_display_repository->getViewDisplay('user', 'user', 'compact');
+  if ($compact_display) {
+    $compact_display->removeComponent($field_name);
+    $compact_display->save();
   }
 }
 
@@ -147,4 +132,19 @@ function enhanced_user_cancellation_update_8001() {
   // Clear menu cache to update task links
   \Drupal::service('plugin.manager.menu.local_task')->clearCachedDefinitions();
   \Drupal::service('router.builder')->rebuild();
+}
+
+/**
+ * Update 8002: Hide timestamp fields and update routing.
+ */
+function enhanced_user_cancellation_update_8002() {
+  // Hide timestamp fields from user displays
+  _enhanced_user_cancellation_hide_field_displays('field_pending_deletion');
+  _enhanced_user_cancellation_hide_field_displays('field_deletion_requested');
+  
+  // Clear caches for routing changes
+  \Drupal::service('router.builder')->rebuild();
+  \Drupal::service('cache_tags.invalidator')->invalidateTags(['rendered', 'config:system.menu.main']);
+  
+  return 'Timestamp fields hidden and routing updated to use /cancel-account path.';
 }

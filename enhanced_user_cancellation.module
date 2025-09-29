@@ -14,33 +14,62 @@ use Drupal\user\Entity\User;
  * Implements hook_form_alter().
  */
 function enhanced_user_cancellation_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  // Alter the user cancel confirm form to use modal.
-  if ($form_id == 'user_cancel_confirm_form') {
-    $form['#attached']['library'][] = 'enhanced_user_cancellation/modal_cancellation';
-    $form['#attached']['drupalSettings']['enhanced_user_cancellation'] = [
-      'modal_title' => (string) new \Drupal\Core\StringTranslation\TranslatableMarkup('Cancel Account'),
-      'cancel_url' => Url::fromRoute('enhanced_user_cancellation.cancel_account')->toString(),
-    ];
-  }
-  
-  // Add enhanced cancellation modal to user edit forms
+  // Only modify user edit forms
   if ($form_id == 'user_form') {
-    // Attach the modal JavaScript to user edit pages
-    $form['#attached']['library'][] = 'enhanced_user_cancellation/modal_cancellation_edit';
-    
-    // Get user from route parameter instead
     $user = \Drupal::routeMatch()->getParameter('user');
+    $current_user = \Drupal::currentUser();
+    
     if ($user) {
-      $current_user = \Drupal::currentUser();
+      // Check if user can cancel account (own account or admin)
+      $can_cancel = ($user->id() == $current_user->id() && $current_user->hasPermission('cancel own user account enhanced')) || 
+                    $current_user->hasPermission('administer enhanced user cancellation');
       
-      // Pass settings for JavaScript
-      $form['#attached']['drupalSettings']['enhancedUserCancellation'] = [
-        'userId' => $user->id(),
-        'canCancel' => ($user->id() == $current_user->id() && $current_user->hasPermission('cancel own user account enhanced')) || $current_user->hasPermission('administer enhanced user cancellation'),
-      ];
+      if ($can_cancel) {
+        // Remove the default "Cancel account" action if it exists
+        if (isset($form['actions']['delete'])) {
+          unset($form['actions']['delete']);
+        }
+        
+        // Add our enhanced cancel account button
+        $form['actions']['cancel_enhanced'] = [
+          '#type' => 'link',
+          '#title' => new \Drupal\Core\StringTranslation\TranslatableMarkup('Cancel Account'),
+          '#url' => Url::fromRoute('enhanced_user_cancellation.cancel_account', ['user' => $user->id()]),
+          '#attributes' => [
+            'class' => ['button', 'button--danger'],
+            'data-dialog-type' => 'modal',
+            'data-dialog-options' => json_encode([
+              'width' => 600,
+              'height' => 400,
+            ]),
+          ],
+          '#weight' => 99,
+        ];
+        
+        // Attach the modal JavaScript to user edit pages
+        $form['#attached']['library'][] = 'enhanced_user_cancellation/modal_cancellation_edit';
+        
+        // Pass settings for JavaScript
+        $form['#attached']['drupalSettings']['enhancedUserCancellation'] = [
+          'userId' => $user->id(),
+          'canCancel' => $can_cancel,
+        ];
+      }
     }
   }
-}/**
+}
+
+/**
+ * Implements hook_menu_local_actions_alter().
+ */
+function enhanced_user_cancellation_menu_local_actions_alter(&$local_actions) {
+  // Remove the default "Cancel account" action if our module is enabled
+  if (isset($local_actions['user.cancel'])) {
+    unset($local_actions['user.cancel']);
+  }
+}
+
+/**
  * Implements hook_user_cancel().
  */
 function enhanced_user_cancellation_user_cancel($edit, $account, $method) {

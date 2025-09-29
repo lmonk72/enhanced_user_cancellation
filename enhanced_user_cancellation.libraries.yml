@@ -13,7 +13,7 @@ modal_cancellation_edit:
     js/modal-cancellation-edit.js: {}
   css:
     theme:
-      css/admin-styles.css: {}
+      css/enhanced-user-cancellation.css: {}
   dependencies:
     - core/drupal
     - core/jquery

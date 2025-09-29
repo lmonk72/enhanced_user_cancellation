@@ -111,8 +111,8 @@ class UserCancelConfirmForm extends FormBase {
       
       $this->messenger()->addStatus($this->t('Your account has been scheduled for deletion. You will receive a confirmation email.'));
       
-      // Use proper base URL instead of hardcoded '/'
-      $form_state->setRedirectUrl(Url::fromRoute('<front>'));
+      // Use proper base URL - redirect to home page
+      $form_state->setRedirect('<front>');
     }
     catch (\Exception $e) {
       \Drupal::logger('enhanced_user_cancellation')
